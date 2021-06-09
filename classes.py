@@ -9,20 +9,15 @@ class Workload():
             raise ValueError
                 
     def __repr__(self):
-        try:
-            return '[ip - %s, credentials - %s, storage - %s ]' % (self.ip, 
+        return '[ip - %s, credentials - %s, storage - %s ]' % (self.ip, 
                                                                self.credentials, 
                                                                self.storage)
-        except TypeError:
-            print('and')
-        except AttributeError:
-            print('and')
-
+       
 
 class Credentials(): pass
     #username - str, password - str, domain - str
 
 
 if __name__ == '__main__':
-    user1 = Workload('111', 11, 'fsfs')
+    user1 = Workload('111', '11', 'fsfs')
     print(user1)       
