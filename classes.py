@@ -46,11 +46,62 @@ class MountPoint():
                                                                              self.total_size)
 
 class Sourse(Workload,Credentials):
-    def check_ip():
-        if Workload.self.ip is '':
-            raise ('У вас тут None')
+    def __init__(self, username, password, ip):
+        if username is None or password is None or ip is None:
+            raise ('You have None')
         else:
-            Workload.self.ip = ip
+            self._username = username
+            self._password = password
+            self._ip = ip
+
+    def change_username(self, username):
+        self._username = username
+        return self._username
+
+    def change_password(self, password):
+        self._password = password
+        return self._password
+
+    @property  # changing the IP is not possible
+    def change_ip(self, ip):
+        self._ip = ip
+        return self._ip
+
+    def get_username(self):
+        return self._username
+
+    def get_password(self):
+        return self._password
+
+    def get_ip(self):
+        return self._ip
+
+    def __repr__(self):
+        return 'Sours(class): Username - %s, Password - %s, Ip - %s' % (self._username, 
+                                                                        self._password,
+                                                                        self._ip)
+
+class MigrationTarget():
+
+    _cloud_types = ['aws', 'azure', 'vsphere', 'vcloud']
+
+    def __init__(self, cloud_type, cloud_credentials, vm_target):
+        if (cloud_type in self._cloud_types and type(cloud_type) == str and
+                type(cloud_credentials) == Credentials and
+                type(vm_target) == Workload):
+            self._cloud_type = cloud_type # type str and only from the types list
+            self.cloud_credentials = cloud_credentials # type Credentials
+            self.vm_target = vm_target # type Workload
+        else:
+            raise ValueError
+
+    def __repr__(self):
+        return 'MigrationTarget(class): Cloud_type - %s, Cloud_credentials - %s, vm_target - %s' % (self._cloud_type, 
+                                                                                                self.cloud_credentials,
+                                                                                                self.vm_target)
+
+class Migration(): pass
+
 
 
 
@@ -62,7 +113,14 @@ if __name__ == '__main__':
     Cred = Credentials('John', 'passw', 'ru')
     #print(Cred)
     WL = Workload('192.0.0.1', Cred, MountPoint.mp_list)
-    print(WL)
-    Sour = Sourse('', Cred, MountPoint.mp_list)
-    print(Sour)
+    #print(WL)
+    Sour = Sourse('User', 'Pass', '192.0.0.2')
+    #Sour.change_ip('192.0.0.3')
+    #print(Sour.get_ip())
+    #print(Sour.get_password())
+    #Sour.change_password('Pass_will_change')
+    #Sour2 = Sourse('User', None, '192.0.0.2')
+    #print(Sour)
     #print(MountPoint.mp_list)  
+    MigTar = MigrationTarget('aws', Cred, WL)
+    print(MigTar)
