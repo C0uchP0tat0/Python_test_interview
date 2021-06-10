@@ -1,3 +1,7 @@
+import time
+import pickle
+import os
+
 class Workload():
     
     def __init__(self, ip, credentials, storage):
@@ -10,7 +14,7 @@ class Workload():
             raise ValueError
                 
     def __repr__(self):
-        return 'Workload(class): Ip - %s, Credentials - %s, Storage - %s ' % (self.ip, 
+        return 'Workload(class):\n Ip - %s,\n Credentials - %s,\n Storage - %s ' % (self.ip, 
                                                                               self.credentials, 
                                                                               self.storage)
        
@@ -26,7 +30,7 @@ class Credentials():
             raise ValueError
                 
     def __repr__(self):
-        return 'Credentials(class): Username - %s, Password - %s, Domain - %s ' % (self.username, 
+        return 'Credentials(class):\n Username - %s,\n Password - %s,\n Domain - %s ' % (self.username, 
                                                                                    self.password, 
                                                                                    self.domain)
 
@@ -42,7 +46,7 @@ class MountPoint():
             raise ValueError
              
     def __repr__(self):
-        return 'MountPoint(class): MountPoint_name - %s, Total_size - %s' % (self.mp_name, 
+        return 'MountPoint(class):\n MountPoint_name - %s,\n Total_size - %s\n' % (self.mp_name, 
                                                                              self.total_size)
 
 class Sourse(Workload,Credentials):
@@ -77,9 +81,9 @@ class Sourse(Workload,Credentials):
         return self._ip
 
     def __repr__(self):
-        return 'Sours(class): Username - %s, Password - %s, Ip - %s' % (self._username, 
-                                                                        self._password,
-                                                                        self._ip)
+        return 'Sours(class):\n Username - %s,\n Password - %s,\n Ip - %s' % (self._username, 
+                                                                              self._password,
+                                                                              self._ip)
 
 class MigrationTarget():
 
@@ -96,19 +100,40 @@ class MigrationTarget():
             raise ValueError
 
     def __repr__(self):
-        return 'MigrationTarget(class): Cloud_type - %s, Cloud_credentials - %s, vm_target - %s' % (self._cloud_type, 
-                                                                                                self.cloud_credentials,
-                                                                                                self.vm_target)
+        return 'MigrationTarget(class):\n Cloud_type - %s,\
+                \n Cloud_credentials - %s,\n vm_target - %s' % (self._cloud_type, 
+                                                                self.cloud_credentials,
+                                                                self.vm_target)
 
-class Migration(): pass
+class Migration(): 
+
+    def __init__(self, select_MP, source, migration_target):
+        if (type(select_MP) == list and (True in [type(i) == MountPoint for i in select_MP]) and
+            type(source) == Workload and type(migration_target) == MigrationTarget):
+            self.select_MP = select_MP
+            self.source = source
+            self.migration_target = migration_target
+            self.migration_state = 'not started'
+        else:
+            raise ValueError
+
+    def run():
+        self.migration_state = 'running'
+        storage
 
 
+    def __repr__(self):
+        return 'Migration(class): Select_MP - %s, \n Source - %s,\
+               \n Migration_target - %s, \n migration_state - %s' % (self.select_MP, 
+                                                                     self.source,
+                                                                     self.migration_target,
+                                                                     self.migration_state)
 
 
 if __name__ == '__main__':
-    #MP1 = MountPoint('c:/', 222)
+    MP1 = MountPoint('c:/', 222)
     #print(MP1)
-    MP2 = MountPoint('d:/', 111)
+    #MP2 = MountPoint('d:/', 111)
     #print(MP2)
     Cred = Credentials('John', 'passw', 'ru')
     #print(Cred)
@@ -124,3 +149,5 @@ if __name__ == '__main__':
     #print(MountPoint.mp_list)  
     MigTar = MigrationTarget('aws', Cred, WL)
     print(MigTar)
+    Migrate = Migration(MountPoint.mp_list, WL, MigTar)
+    #print(Migrate)
