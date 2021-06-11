@@ -89,21 +89,21 @@ class MigrationTarget():
 
     _cloud_types = ['aws', 'azure', 'vsphere', 'vcloud']
 
-    def __init__(self, cloud_type, cloud_credentials, vm_target):
+    def __init__(self, cloud_type, cloud_credentials, target_vm):
         if (cloud_type in self._cloud_types and type(cloud_type) == str and
                 type(cloud_credentials) == Credentials and
-                type(vm_target) == Workload):
+                type(target_vm) == Workload):
             self._cloud_type = cloud_type # type str and only from the types list
             self.cloud_credentials = cloud_credentials # type Credentials
-            self.vm_target = vm_target # type Workload
+            self.target_vm = target_vm # type Workload
         else:
             raise ValueError
 
     def __repr__(self):
         return 'MigrationTarget(class):\n Cloud_type - %s,\
-                \n Cloud_credentials - %s,\n vm_target - %s' % (self._cloud_type, 
+                \n Cloud_credentials - %s,\n target_vm - %s' % (self._cloud_type, 
                                                                 self.cloud_credentials,
-                                                                self.vm_target)
+                                                                self.target_vm)
 
 class Migration(): 
 
@@ -117,10 +117,20 @@ class Migration():
         else:
             raise ValueError
 
-    def run():
+    def run(self):
         self.migration_state = 'running'
-        storage
-
+        time.sleep(1)
+        storage_for_migration = []
+        storage_for_migration_target = []
+        storage_for_migration.append(self.source.storage)
+        for i in storage_for_migration:
+            storage_for_migration_target.append(i)
+        self.migration_target.target_vm.ip = self.source.ip
+        self.migration_target.target_vm.credentials = self.source.credentials
+        self.migration_state = "success"
+        #return storage_for_migration
+        #return storage_for_migration_target
+        return self.migration_target.target_vm.credentials, self.migration_target.target_vm.ip
 
     def __repr__(self):
         return 'Migration(class): Select_MP - %s, \n Source - %s,\
@@ -133,7 +143,7 @@ class Migration():
 if __name__ == '__main__':
     MP1 = MountPoint('c:/', 222)
     #print(MP1)
-    #MP2 = MountPoint('d:/', 111)
+    MP2 = MountPoint('d:/', 111)
     #print(MP2)
     Cred = Credentials('John', 'passw', 'ru')
     #print(Cred)
@@ -148,6 +158,7 @@ if __name__ == '__main__':
     #print(Sour)
     #print(MountPoint.mp_list)  
     MigTar = MigrationTarget('aws', Cred, WL)
-    print(MigTar)
+    #print(MigTar)
     Migrate = Migration(MountPoint.mp_list, WL, MigTar)
+    print(Migrate.run())
     #print(Migrate)
