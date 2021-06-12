@@ -35,11 +35,9 @@ class Credentials():
                                                                                    self.domain)
 
 class MountPoint():
-    mp_list=[] # list of class instances
-   
+       
     def __init__(self, mp_name, total_size):
         if (type(mp_name) == str and type(total_size) == int): 
-            MountPoint.mp_list.append(self) # adds an instance of the class to the list
             self.mp_name = mp_name  # type str 
             self.total_size = total_size  # type int
         else:
@@ -49,7 +47,7 @@ class MountPoint():
         return 'MountPoint(class):\n MountPoint_name - %s,\n Total_size - %s\n' % (self.mp_name, 
                                                                              self.total_size)
 
-class Sourse(Workload,Credentials):
+class Sourse():
     def __init__(self, username, password, ip):
         if username is None or password is None or ip is None:
             raise ('You have None')
@@ -107,10 +105,10 @@ class MigrationTarget():
 
 class Migration(): 
 
-    def __init__(self, select_MP, source, migration_target):
-        if (type(select_MP) == list and (True in [type(i) == MountPoint for i in select_MP]) and
+    def __init__(self, select_mp, source, migration_target):
+        if (type(select_mp) == list and (True in [type(i) == MountPoint for i in select_mp]) and
             type(source) == Workload and type(migration_target) == MigrationTarget):
-            self.select_MP = select_MP
+            self.select_mp = select_mp
             self.source = source
             self.migration_target = migration_target
             self.migration_state = 'not started'
@@ -120,34 +118,42 @@ class Migration():
     def run(self):
         self.migration_state = 'running'
         time.sleep(1)
-        storage_for_migration = []
-        storage_for_migration_target = []
-        storage_for_migration.append(self.source.storage)
-        for i in storage_for_migration:
-            storage_for_migration_target.append(i)
-        self.migration_target.target_vm.ip = self.source.ip
-        self.migration_target.target_vm.credentials = self.source.credentials
-        self.migration_state = "success"
-        #return storage_for_migration
-        #return storage_for_migration_target
-        return self.migration_target.target_vm.credentials, self.migration_target.target_vm.ip
+        migration_target_mp = []
+        for i in self.source.storage:
+            if i.mp_name in [j.mp_name for j in self.select_mp]:
+                migration_target_mp.append(i)
+        if len(migration_target_mp) != 0:
+            self.migration_state = "success"
+            self.migration_target.target_vm.ip = self.source.ip
+            self.migration_target.target_vm.credentials = self.source.credentials
+            return self.migration_state, migration_target_mp, \
+                   self.migration_target.target_vm.ip, \
+                   self.migration_target.target_vm.credentials
+        else:
+            self.migration_state = 'error'
+            return self.migration_state
 
     def __repr__(self):
-        return 'Migration(class): Select_MP - %s, \n Source - %s,\
-               \n Migration_target - %s, \n migration_state - %s' % (self.select_MP, 
+        return 'Migration(class): Select_mp - %s, \n Source - %s,\
+               \n Migration_target - %s, \n migration_state - %s' % (self.select_mp, 
                                                                      self.source,
                                                                      self.migration_target,
                                                                      self.migration_state)
 
 
 if __name__ == '__main__':
-    MP1 = MountPoint('c:/', 222)
+    MP1 = [MountPoint('e:/', 333)]
+    #MP2 = [MountPoint('d:/', 111)]
+    #MP1 = [MountPoint('d:/', 111), MountPoint('e:/', 333)]
     #print(MP1)
-    MP2 = MountPoint('d:/', 111)
+    MP2 = [MountPoint('e:/', 333), MountPoint('c:/', 222), MountPoint('d:/', 111), ]
+    #MP2 = []
     #print(MP2)
     Cred = Credentials('John', 'passw', 'ru')
+    Cred2 = Credentials('Don', 'passwdon', 'com')
     #print(Cred)
-    WL = Workload('192.0.0.1', Cred, MountPoint.mp_list)
+    WL = Workload('192.0.0.1', Cred, MP1)
+    WL2 = Workload('192.0.0.2', Cred2, MP2)
     #print(WL)
     Sour = Sourse('User', 'Pass', '192.0.0.2')
     #Sour.change_ip('192.0.0.3')
@@ -156,9 +162,13 @@ if __name__ == '__main__':
     #Sour.change_password('Pass_will_change')
     #Sour2 = Sourse('User', None, '192.0.0.2')
     #print(Sour)
-    #print(MountPoint.mp_list)  
-    MigTar = MigrationTarget('aws', Cred, WL)
+    #print(MP1)
+    MigTar = MigrationTarget('aws', Credentials('John', 'passw', 'ru'), \
+        Workload('192.0.0.1', Credentials('John', 'passw', 'ru'), [MountPoint('e:/', 333)]))  
+    Migrate = Migration( [MountPoint('c:/', 333), MountPoint('d:/', 333)], Workload('192.0.0.2', \
+        Credentials('Don', 'passwdon', 'com'), [MountPoint('e:/', 333), MountPoint('c:/', 333)]), MigTar)
+    #MigTar = MigrationTarget('aws', Cred, WL2)
     #print(MigTar)
-    Migrate = Migration(MountPoint.mp_list, WL, MigTar)
+    #Migrate = Migration(MP2, WL2, MigTar)
     print(Migrate.run())
     #print(Migrate)
