@@ -47,7 +47,10 @@ class MountPoint():
         return 'MountPoint(class):\n MountPoint_name - %s,\n Total_size - %s\n' % (self.mp_name, 
                                                                              self.total_size)
 
-class Sourse():
+class Sourсe():
+    source_list_ip = []
+    source_list_data = []
+
     def __init__(self, username, password, ip):
         if username is None or password is None or ip is None:
             raise ('You have None')
@@ -55,6 +58,8 @@ class Sourse():
             self._username = username
             self._password = password
             self._ip = ip
+            self.source_list_ip.append(self._ip)
+            self.source_list_data.append([self._username, self._password])
 
     def change_username(self, username):
         self._username = username
@@ -105,12 +110,14 @@ class MigrationTarget():
 
 class Migration(): 
 
+    disk_c_allowed = True
+
     def __init__(self, select_mp, source, migration_target):
         if (type(select_mp) == list and (True in [type(i) == MountPoint for i in select_mp]) and
             type(source) == Workload and type(migration_target) == MigrationTarget):
-            self.select_mp = select_mp
-            self.source = source
-            self.migration_target = migration_target
+            self.select_mp = select_mp               # type list[MountPoint]
+            self.source = source                     # type Workload
+            self.migration_target = migration_target # type MigrationTarget
             self.migration_state = 'not started'
         else:
             raise ValueError
@@ -122,7 +129,7 @@ class Migration():
         for i in self.source.storage:
             if i.mp_name in [j.mp_name for j in self.select_mp]:
                 migration_target_mp.append(i)
-        if len(migration_target_mp) != 0:
+        if len(migration_target_mp) != 0 and self.disk_c_allowed:
             self.migration_state = "success"
             self.migration_target.target_vm.ip = self.source.ip
             self.migration_target.target_vm.credentials = self.source.credentials
@@ -134,11 +141,38 @@ class Migration():
             return self.migration_state
 
     def __repr__(self):
-        return 'Migration(class): Select_mp - %s, \n Source - %s,\
+        return 'Migration(class): Select_mp - %s, \n Sourсe - %s,\
                \n Migration_target - %s, \n migration_state - %s' % (self.select_mp, 
                                                                      self.source,
                                                                      self.migration_target,
                                                                      self.migration_state)
+
+class PersistenceLayer(Sourсe):
+
+    def __init__(self, obj_dict, file_storage):
+        if type(obj_dict) == dict and type(file_storage) == str:
+            self.obj_dict = obj_dict
+            self.file_storage = file_storage
+        else:
+            raise ValueError
+
+    def create(self, obj = {}):
+        self.obj_dict == obj
+        for k in Sourсe.source_list_ip:
+            for v in Sourсe.source_list_data:
+                self.obj_dict[k] = v
+        with open(self.file_storage, 'wb') as file:
+            pickle.dump(self.obj_dict, file)
+        
+    def read(self):
+        with open(self.file_storage, 'rb') as file:
+            self.obj_dict = pickle.load(file)
+        return self.obj_dict
+
+    def delete(self):
+        os.remove(self.file_storage)
+
+
 
 
 if __name__ == '__main__':
@@ -149,13 +183,16 @@ if __name__ == '__main__':
     MP2 = [MountPoint('e:/', 333), MountPoint('c:/', 222), MountPoint('d:/', 111), ]
     #MP2 = []
     #print(MP2)
+
     Cred = Credentials('John', 'passw', 'ru')
     Cred2 = Credentials('Don', 'passwdon', 'com')
     #print(Cred)
     WL = Workload('192.0.0.1', Cred, MP1)
     WL2 = Workload('192.0.0.2', Cred2, MP2)
     #print(WL)
-    Sour = Sourse('User', 'Pass', '192.0.0.2')
+    Sour = Sourсe('User', 'Pass', '192.0.0.2')
+    Sour2 = Sourсe('User2', 'Pass2', '192.0.0.1')
+    Sour3 = Sourсe('User3', 'Pass3', '192.0.0.1')
     #Sour.change_ip('192.0.0.3')
     #print(Sour.get_ip())
     #print(Sour.get_password())
@@ -170,5 +207,17 @@ if __name__ == '__main__':
     #MigTar = MigrationTarget('aws', Cred, WL2)
     #print(MigTar)
     #Migrate = Migration(MP2, WL2, MigTar)
-    print(Migrate.run())
+    #print(Migrate.run())
     #print(Migrate)
+    #print(PersistenceLayer.create(Sour))
+    #print(PersistenceLayer.create(Sour2))
+    #Sour.adds()
+    #Sour2.adds()
+    Per = PersistenceLayer({}, 'File')
+    #print(PersistenceLayer.create(Per))
+    #print(PersistenceLayer.read(Per))
+    #print(Sourсe.source_list_ip)
+    #print(Sourсe.source_list_data)
+    PersistenceLayer.delete(Per)
+    
+    
