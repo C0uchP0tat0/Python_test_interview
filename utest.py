@@ -64,48 +64,5 @@ class TestSource(unittest.TestCase):
         self.assertEqual(self.sour.get_username(), 'John')
         self.assertEqual(self.sour.get_password(), 'pass')
 
-class TestMigration(unittest.TestCase):
-    def setUp(self):
-        self.select_mp = [classes.MountPoint('c:/', 333), classes.MountPoint('d:/', 333)]
-
-        self.source_credentials_migration = classes.Credentials('Don', 'passwdon', 'com')
-
-        self.source_mp_migration = [classes.MountPoint('e:/', 333), classes.MountPoint('c:/', 333)]
-
-        self.source = classes.Workload('192.0.0.2', self.source_credentials_migration, 
-                                                    self.source_mp_migration)
-        
-        self.cloud_credentials = classes.Credentials('John', 'pass', 'ru')
-
-        self.target_vm = classes.Workload('192.168.1.1',
-                                      self.cloud_credentials,
-                                      self.source_mp_migration)
-
-        self.migration_target = classes.MigrationTarget("aws",
-                                                    self.cloud_credentials,
-                                                    self.target_vm)
-        
-        self.migration = classes.Migration(self.select_mp,
-                                           self.source,
-                                           self.migration_target)
-
-    def test_run_successful(self):
-        self.migration.run()
-        self.assertEqual(self.migration.migration_state, "success")
-        self.assertEqual(self.target_vm.ip, self.source.ip)
-        self.assertEqual(self.target_vm.credentials, self.source.credentials)
-        selected_mountpoints_are_in_target_storage =\
-            False not in [x.mp_name in [y.mp_name for y in self.target_vm.storage]
-                          for x in self.select_mp]
-        copied_target_storage_elements_are_equal_to_source_ones =\
-            False not in [x in self.source.storage
-                          for x in self.target_vm.storage
-                          if x.mp_name in
-                          [y.mp_name for y in self.select_mp]]
-        self.assertTrue(
-            copied_target_storage_elements_are_equal_to_source_ones)
-        self.assertEqual([(x.mp_name, x.total_size) for x in self.target_vm.storage],
-                         [("e:/", 333), ("c:/", 333)])
-
 if __name__ == "__main__":
     unittest.main()

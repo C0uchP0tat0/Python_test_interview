@@ -174,7 +174,7 @@ class PersistenceLayer(Source):
 
 
 
-
+'''
 if __name__ == '__main__':
     MP1 = [MountPoint('e:/', 333)]
     #MP2 = [MountPoint('d:/', 111)]
@@ -219,6 +219,6 @@ if __name__ == '__main__':
     #print(PersistenceLayer.read(Per))
     #print(Sourсe.source_list_ip)
     #print(Sourсe.source_list_data)
-    #PersistenceLayer.delete(Per)
+    #PersistenceLayer.delete(Per)'''
     
     
