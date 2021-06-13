@@ -47,17 +47,18 @@ class MountPoint():
         return 'MountPoint(class):\n MountPoint_name - %s,\n Total_size - %s\n' % (self.mp_name, 
                                                                              self.total_size)
 
-class Sourсe():
+class Source():
     source_list_ip = []
     source_list_data = []
 
-    def __init__(self, username, password, ip):
+    def __init__(self, username, password, ip, change_ip_possible=True):
         if username is None or password is None or ip is None:
             raise ('You have None')
         else:
             self._username = username
             self._password = password
             self._ip = ip
+            self._change_ip_possible = change_ip_possible
             self.source_list_ip.append(self._ip)
             self.source_list_data.append([self._username, self._password])
 
@@ -69,10 +70,9 @@ class Sourсe():
         self._password = password
         return self._password
 
-    @property  # changing the IP is not possible
     def change_ip(self, ip):
-        self._ip = ip
-        return self._ip
+        if self._change_ip_possible:
+            self._ip = ip
 
     def get_username(self):
         return self._username
@@ -141,13 +141,13 @@ class Migration():
             return self.migration_state
 
     def __repr__(self):
-        return 'Migration(class): Select_mp - %s, \n Sourсe - %s,\
+        return 'Migration(class): Select_mp - %s, \n Source - %s,\
                \n Migration_target - %s, \n migration_state - %s' % (self.select_mp, 
                                                                      self.source,
                                                                      self.migration_target,
                                                                      self.migration_state)
 
-class PersistenceLayer(Sourсe):
+class PersistenceLayer(Source):
 
     def __init__(self, obj_dict, file_storage):
         if type(obj_dict) == dict and type(file_storage) == str:
@@ -158,12 +158,12 @@ class PersistenceLayer(Sourсe):
 
     def create(self, obj = {}):
         self.obj_dict == obj
-        for k in Sourсe.source_list_ip:
-            for v in Sourсe.source_list_data:
+        for k in Source.source_list_ip:
+            for v in Source.source_list_data:
                 self.obj_dict[k] = v
         with open(self.file_storage, 'wb') as file:
             pickle.dump(self.obj_dict, file)
-        
+
     def read(self):
         with open(self.file_storage, 'rb') as file:
             self.obj_dict = pickle.load(file)
@@ -190,34 +190,35 @@ if __name__ == '__main__':
     WL = Workload('192.0.0.1', Cred, MP1)
     WL2 = Workload('192.0.0.2', Cred2, MP2)
     #print(WL)
-    Sour = Sourсe('User', 'Pass', '192.0.0.2')
-    Sour2 = Sourсe('User2', 'Pass2', '192.0.0.1')
-    Sour3 = Sourсe('User3', 'Pass3', '192.0.0.1')
+    Sour = Source('User', 'Pass', '192.0.0.2', )
+    Sour2 = Source('User2', 'Pass2', '192.0.0.1')
+    Sour3 = Source('User3', 'Pass3', '192.0.0.1')
     #Sour.change_ip('192.0.0.3')
     #print(Sour.get_ip())
-    #print(Sour.get_password())
-    #Sour.change_password('Pass_will_change')
+    #print(Sour2.get_password())
+    #Sour2.change_password('Pass_will_change')
+    #print(Sour2.get_password())
     #Sour2 = Sourse('User', None, '192.0.0.2')
     #print(Sour)
     #print(MP1)
     MigTar = MigrationTarget('aws', Credentials('John', 'passw', 'ru'), \
         Workload('192.0.0.1', Credentials('John', 'passw', 'ru'), [MountPoint('e:/', 333)]))  
     Migrate = Migration( [MountPoint('c:/', 333), MountPoint('d:/', 333)], Workload('192.0.0.2', \
-        Credentials('Don', 'passwdon', 'com'), [MountPoint('e:/', 333), MountPoint('c:/', 333)]), MigTar)
+        Credentials('Don', 'passwdon', 'com'), [MountPoint('c:/', 333), MountPoint('e:/', 333)]), MigTar)
     #MigTar = MigrationTarget('aws', Cred, WL2)
     #print(MigTar)
     #Migrate = Migration(MP2, WL2, MigTar)
-    #print(Migrate.run())
+    print(Migrate.run())
     #print(Migrate)
     #print(PersistenceLayer.create(Sour))
     #print(PersistenceLayer.create(Sour2))
     #Sour.adds()
     #Sour2.adds()
-    Per = PersistenceLayer({}, 'File')
+    #Per = PersistenceLayer({}, 'File')
     #print(PersistenceLayer.create(Per))
     #print(PersistenceLayer.read(Per))
     #print(Sourсe.source_list_ip)
     #print(Sourсe.source_list_data)
-    PersistenceLayer.delete(Per)
+    #PersistenceLayer.delete(Per)
     
     
