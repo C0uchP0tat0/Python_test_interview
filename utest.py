@@ -74,45 +74,20 @@ class TestMigration(unittest.TestCase):
 
         self.source = classes.Workload('192.0.0.2', self.source_credentials_migration, 
                                                     self.source_mp_migration)
+        
         self.cloud_credentials = classes.Credentials('John', 'pass', 'ru')
 
-        '''self.selected_absent_mount_points = [classes.MountPoint('c:', 100),
-                                             classes.MountPoint('z:', 100)]
-
-        self.source_credentials = classes.Credentials('John',
-                                                  'JohnPass',
-                                                  'domain1')
-
-        self.source_storage = [classes.MountPoint('c:', 100),
-                               classes.MountPoint('d:', 100),
-                               classes.MountPoint('e:', 100)]
-
-        self.source = classes.Workload('192.168.1.1',
-                                   self.source_credentials,
-                                   self.source_storage)
-
-        self.cloud_credentials = classes.Credentials('CloudJohn',
-                                                 'CloudJohnPass',
-                                                 'domain1')
-
-        self.target_credentials = classes.Credentials('John',
-                                                  'JohnPass',
-                                                  'domain1')
-
-        self.target_storage = [classes.MountPoint('f:', 100),
-                               classes.MountPoint('g:', 100)]
-
         self.target_vm = classes.Workload('192.168.1.1',
-                                      self.target_credentials,
-                                      self.target_storage)
+                                      self.cloud_credentials,
+                                      self.source_mp_migration)
 
         self.migration_target = classes.MigrationTarget("aws",
                                                     self.cloud_credentials,
                                                     self.target_vm)
-
-        self.migration = classes.Migration(self.selected_mount_points,
-                                       self.source,
-                                       self.migration_target)'''
+        
+        self.migration = classes.Migration(self.select_mp,
+                                           self.source,
+                                           self.migration_target)
 
     def test_run_successful(self):
         self.migration.run()
@@ -121,16 +96,16 @@ class TestMigration(unittest.TestCase):
         self.assertEqual(self.target_vm.credentials, self.source.credentials)
         selected_mountpoints_are_in_target_storage =\
             False not in [x.mp_name in [y.mp_name for y in self.target_vm.storage]
-                          for x in self.selected_mount_points]
+                          for x in self.select_mp]
         copied_target_storage_elements_are_equal_to_source_ones =\
             False not in [x in self.source.storage
                           for x in self.target_vm.storage
                           if x.mp_name in
-                          [y.mp_name for y in self.selected_mount_points]]
+                          [y.mp_name for y in self.select_mp]]
         self.assertTrue(
             copied_target_storage_elements_are_equal_to_source_ones)
         self.assertEqual([(x.mp_name, x.total_size) for x in self.target_vm.storage],
-                         [("f:", 100), ("g:", 100)])
+                         [("e:/", 333), ("c:/", 333)])
 
 if __name__ == "__main__":
     unittest.main()
